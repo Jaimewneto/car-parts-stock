@@ -1,4 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
+
+import { PaginatedResult, PaginationOptions } from "../types/pagination";
 
 const prisma = new PrismaClient();
 
@@ -15,13 +17,39 @@ export interface UpdateInventoryInput {
 }
 
 export const inventoryService = {
-  async getAllInventory() {
-    return prisma.inventory.findMany({
-      include: {
-        product: true,
-        warehouse: true,
+  async getAllInventory(
+    options: PaginationOptions = {}
+  ): Promise<PaginatedResult<any>> {
+    const page = options.page || 1;
+    const pageSize = options.pageSize || 10;
+    const skip = (page - 1) * pageSize;
+
+    const [data, total] = await Promise.all([
+      prisma.inventory.findMany({
+        skip,
+        take: pageSize,
+        include: {
+          product: true,
+          warehouse: true,
+        },
+        orderBy: { id: "asc" },
+      }),
+      prisma.inventory.count(),
+    ]);
+
+    const totalPages = Math.ceil(total / pageSize);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        pageSize,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
       },
-    });
+    };
   },
 
   async getInventoryById(id: number) {
@@ -34,7 +62,10 @@ export const inventoryService = {
     });
   },
 
-  async getInventoryByProductAndWarehouse(productId: number, warehouseId: number) {
+  async getInventoryByProductAndWarehouse(
+    productId: number,
+    warehouseId: number
+  ) {
     return prisma.inventory.findFirst({
       where: {
         productId,
@@ -47,26 +78,88 @@ export const inventoryService = {
     });
   },
 
-  async getInventoryByProduct(productId: number) {
-    return prisma.inventory.findMany({
-      where: {
-        productId,
+  async getInventoryByProduct(
+    productId: number,
+    options: PaginationOptions = {}
+  ): Promise<PaginatedResult<any>> {
+    const page = options.page || 1;
+    const pageSize = options.pageSize || 10;
+    const skip = (page - 1) * pageSize;
+
+    const [data, total] = await Promise.all([
+      prisma.inventory.findMany({
+        where: {
+          productId,
+        },
+        skip,
+        take: pageSize,
+        include: {
+          warehouse: true,
+        },
+        orderBy: { id: "asc" },
+      }),
+      prisma.inventory.count({
+        where: {
+          productId,
+        },
+      }),
+    ]);
+
+    const totalPages = Math.ceil(total / pageSize);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        pageSize,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
       },
-      include: {
-        warehouse: true,
-      },
-    });
+    };
   },
 
-  async getInventoryByWarehouse(warehouseId: number) {
-    return prisma.inventory.findMany({
-      where: {
-        warehouseId,
+  async getInventoryByWarehouse(
+    warehouseId: number,
+    options: PaginationOptions = {}
+  ): Promise<PaginatedResult<any>> {
+    const page = options.page || 1;
+    const pageSize = options.pageSize || 10;
+    const skip = (page - 1) * pageSize;
+
+    const [data, total] = await Promise.all([
+      prisma.inventory.findMany({
+        where: {
+          warehouseId,
+        },
+        skip,
+        take: pageSize,
+        include: {
+          product: true,
+        },
+        orderBy: { id: "asc" },
+      }),
+      prisma.inventory.count({
+        where: {
+          warehouseId,
+        },
+      }),
+    ]);
+
+    const totalPages = Math.ceil(total / pageSize);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        pageSize,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
       },
-      include: {
-        product: true,
-      },
-    });
+    };
   },
 
   async createInventory(data: CreateInventoryInput) {

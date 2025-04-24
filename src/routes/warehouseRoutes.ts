@@ -6,7 +6,7 @@ const warehouseRoutes = new Hono();
 warehouseRoutes.get('/', warehouseController.getAllWarehouses);
 warehouseRoutes.get('/:id', warehouseController.getWarehouseById);
 warehouseRoutes.post('/', warehouseController.createWarehouse);
-warehouseRoutes.put('/:id', warehouseController.updateWarehouse);
+warehouseRoutes.patch('/:id', warehouseController.updateWarehouse);
 warehouseRoutes.delete('/:id', warehouseController.deleteWarehouse);
 
 export default warehouseRoutes;

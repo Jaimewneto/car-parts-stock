@@ -8,7 +8,7 @@ inventoryRoutes.get('/:id', inventoryController.getInventoryById);
 inventoryRoutes.get('/warehouse/:warehouseId', inventoryController.getInventoryByWarehouse);
 inventoryRoutes.get('/product/:productId', inventoryController.getInventoryByProduct);
 inventoryRoutes.post('/', inventoryController.createInventory);
-inventoryRoutes.put('/:id', inventoryController.updateInventory);
+inventoryRoutes.patch('/:id', inventoryController.updateInventory);
 inventoryRoutes.delete('/:id', inventoryController.deleteInventory);
 
 export default inventoryRoutes;

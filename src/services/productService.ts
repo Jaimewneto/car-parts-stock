@@ -1,4 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
+
+import { PaginatedResult, PaginationOptions } from "../types/pagination";
 
 const prisma = new PrismaClient();
 
@@ -23,8 +25,35 @@ export interface UpdateProductInput {
 }
 
 export const productService = {
-  async getAllProducts() {
-    return prisma.product.findMany();
+  async getAllProducts(
+    options: PaginationOptions = {}
+  ): Promise<PaginatedResult<any>> {
+    const page = options.page || 1;
+    const pageSize = options.pageSize || 10;
+    const skip = (page - 1) * pageSize;
+
+    const [data, total] = await Promise.all([
+      prisma.product.findMany({
+        skip,
+        take: pageSize,
+        orderBy: { id: "asc" },
+      }),
+      prisma.product.count(),
+    ]);
+
+    const totalPages = Math.ceil(total / pageSize);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        pageSize,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+      },
+    };
   },
 
   async getProductById(id: number) {
