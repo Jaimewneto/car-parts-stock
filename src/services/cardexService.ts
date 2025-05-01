@@ -1,8 +1,6 @@
-import { PrismaClient } from "@prisma/client";
-
 import { PaginationOptions } from "../types/pagination";
 
-const prisma = new PrismaClient();
+import prisma from '../prismaClient';
 
 export class CardexService {
   static async getMovementsByInventory(

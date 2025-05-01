@@ -1,8 +1,6 @@
-import { PrismaClient } from "@prisma/client";
-
 import { PaginatedResult, PaginationOptions } from "../types/pagination";
 
-const prisma = new PrismaClient();
+import prisma from '../prismaClient';
 
 export interface CreateProductInput {
   sku: string;
