@@ -12,8 +12,8 @@ app.use('*', logger());
 app.use('*', cors());
 
 // Routes
-app.route('/api/products', productRoutes);
-app.route('/api/warehouses', warehouseRoutes);
+app.route('/api/product', productRoutes);
+app.route('/api/warehouse', warehouseRoutes);
 app.route('/api/inventory', inventoryRoutes);
 
 // Health check route
