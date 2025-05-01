@@ -63,6 +63,13 @@ export const productService = {
         skip,
         take: pageSize,
         orderBy: { id: "asc" },
+        include: {
+          inventory: {
+            include: {
+              warehouse: true,
+            },
+          },
+        },
       }),
       prisma.product.count({ where }),
     ]);
@@ -85,12 +92,26 @@ export const productService = {
   async getProductById(id: number) {
     return prisma.product.findUnique({
       where: { id },
+      include: {
+        inventory: {
+          include: {
+            warehouse: true,
+          },
+        },
+      },
     });
   },
 
   async getProductBySku(sku: string) {
     return prisma.product.findUnique({
       where: { sku },
+      include: {
+        inventory: {
+          include: {
+            warehouse: true,
+          },
+        },
+      },
     });
   },
 

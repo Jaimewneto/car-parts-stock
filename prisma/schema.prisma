@@ -46,6 +46,18 @@ model Inventory {
   updatedAt   DateTime  @updatedAt
   product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
   warehouse   Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  cardex      Cardex[]
 
   @@unique([productId, warehouseId])
+}
+
+model Cardex {
+  id           Int        @id @default(autoincrement())
+  inventoryId  Int
+  addition     Int        @default(0) // quantidade adicionada
+  withdrawal   Int        @default(0) // quantidade retirada
+  note         String?
+  createdAt    DateTime   @default(now())
+
+  inventory    Inventory  @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
 }
