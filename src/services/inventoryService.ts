@@ -188,4 +188,53 @@ export const inventoryService = {
       where: { id },
     });
   },
+
+  async addToStock(inventoryId: number, quantity: number, note?: string) {
+    return prisma.$transaction(async (tx) => {
+      const updated = await tx.inventory.update({
+        where: { id: inventoryId },
+        data: {
+          quantity: {
+            increment: quantity,
+          },
+        },
+      });
+  
+      await tx.cardex.create({
+        data: {
+          inventoryId,
+          addition: quantity,
+          withdrawal: 0,
+          note,
+        },
+      });
+  
+      return updated;
+    });
+  },
+  
+  async removeFromStock(inventoryId: number, quantity: number, note?: string) {
+    return prisma.$transaction(async (tx) => {
+      const updated = await tx.inventory.update({
+        where: { id: inventoryId },
+        data: {
+          quantity: {
+            decrement: quantity,
+          },
+        },
+      });
+  
+      await tx.cardex.create({
+        data: {
+          inventoryId,
+          addition: 0,
+          withdrawal: quantity,
+          note,
+        },
+      });
+  
+      return updated;
+    });
+  },
+  
 };

@@ -20,6 +20,11 @@ const updateInventorySchema = z.object({
   minLevel: z.number().int().min(0).optional(),
 });
 
+const stockAdjustmentSchema = z.object({
+  quantity: z.number().int().positive(),
+  note: z.string().optional(),
+});
+
 export const inventoryController = {
   async getAllInventory(c: Context) {
     try {
@@ -264,6 +269,80 @@ export const inventoryController = {
         { success: false, error: "Failed to delete inventory" },
         500
       );
+    }
+  },
+
+  async addToStock(c: Context) {
+    try {
+      const id = Number(c.req.param("id"));
+      if (isNaN(id)) {
+        return c.json({ success: false, error: "Invalid inventory ID" }, 400);
+      }
+
+      const body = await c.req.json();
+      const validationResult = stockAdjustmentSchema.safeParse(body);
+      if (!validationResult.success) {
+        return c.json(
+          { success: false, error: validationResult.error.format() },
+          400
+        );
+      }
+
+      const { quantity, note } = validationResult.data;
+
+      // Verifica se o estoque existe
+      const inventory = await inventoryService.getInventoryById(id);
+      if (!inventory) {
+        return c.json({ success: false, error: "Inventory not found" }, 404);
+      }
+
+      const updated = await inventoryService.addToStock(id, quantity, note);
+      return c.json({ success: true, data: updated });
+    } catch (error) {
+      console.error("Error adding stock:", error);
+      return c.json({ success: false, error: "Failed to add stock" }, 500);
+    }
+  },
+
+  async removeFromStock(c: Context) {
+    try {
+      const id = Number(c.req.param("id"));
+      if (isNaN(id)) {
+        return c.json({ success: false, error: "Invalid inventory ID" }, 400);
+      }
+
+      const body = await c.req.json();
+      const validationResult = stockAdjustmentSchema.safeParse(body);
+      if (!validationResult.success) {
+        return c.json(
+          { success: false, error: validationResult.error.format() },
+          400
+        );
+      }
+
+      const { quantity, note } = validationResult.data;
+
+      // Verifica se o estoque existe
+      const inventory = await inventoryService.getInventoryById(id);
+      if (!inventory) {
+        return c.json({ success: false, error: "Inventory not found" }, 404);
+      }
+
+      if (inventory.quantity < quantity) {
+        return c.json(
+          {
+            success: false,
+            error: "Not enough stock to remove the requested quantity",
+          },
+          400
+        );
+      }
+
+      const updated = await inventoryService.removeFromStock(id, quantity, note);
+      return c.json({ success: true, data: updated });
+    } catch (error) {
+      console.error("Error removing stock:", error);
+      return c.json({ success: false, error: "Failed to remove stock" }, 500);
     }
   },
 };

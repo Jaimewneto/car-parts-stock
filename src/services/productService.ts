@@ -26,7 +26,7 @@ export interface UpdateProductInput {
 
 export const productService = {
   async getAllProducts(
-    options: PaginationOptions & { query?: string } = {}
+    options: PaginationOptions = {}
   ): Promise<PaginatedResult<any>> {
     const page = options.page || 1;
     const pageSize = options.pageSize || 10;
