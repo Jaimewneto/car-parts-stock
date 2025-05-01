@@ -26,19 +26,45 @@ export interface UpdateProductInput {
 
 export const productService = {
   async getAllProducts(
-    options: PaginationOptions = {}
+    options: PaginationOptions & { query?: string } = {}
   ): Promise<PaginatedResult<any>> {
     const page = options.page || 1;
     const pageSize = options.pageSize || 10;
     const skip = (page - 1) * pageSize;
 
+    const where = options.query
+      ? {
+          OR: [
+            {
+              name: {
+                contains: options.query,
+                mode: "insensitive" as const,
+              },
+            },
+            {
+              description: {
+                contains: options.query,
+                mode: "insensitive" as const,
+              },
+            },
+            {
+              sku: {
+                contains: options.query,
+                mode: "insensitive" as const,
+              },
+            },
+          ],
+        }
+      : undefined;
+
     const [data, total] = await Promise.all([
       prisma.product.findMany({
+        where,
         skip,
         take: pageSize,
         orderBy: { id: "asc" },
       }),
-      prisma.product.count(),
+      prisma.product.count({ where }),
     ]);
 
     const totalPages = Math.ceil(total / pageSize);

@@ -13,4 +13,5 @@ export interface PaginatedResult<T> {
 export interface PaginationOptions {
   page?: number;
   pageSize?: number;
+  query?: string;
 }

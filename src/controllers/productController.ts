@@ -31,6 +31,7 @@ export const productController = {
     try {
       const page = parseInt(c.req.query("page") || "1");
       const pageSize = parseInt(c.req.query("pageSize") || "10");
+      const query = c.req.query("query") || "";
 
       if (isNaN(page) || page < 1 || isNaN(pageSize) || pageSize < 1) {
         return c.json(
@@ -43,7 +44,11 @@ export const productController = {
         );
       }
 
-      const result = await productService.getAllProducts({ page, pageSize });
+      const result = await productService.getAllProducts({
+        page,
+        pageSize,
+        query,
+      });
       return c.json({ success: true, ...result });
     } catch (error) {
       console.error("Error getting products:", error);
